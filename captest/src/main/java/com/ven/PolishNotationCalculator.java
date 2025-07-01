@@ -1,10 +1,15 @@
 package com.ven;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.ven.exception.PolishNotationException;
 
@@ -31,13 +36,43 @@ public class PolishNotationCalculator {
         symbolOperatorMap.put(AVG, new AvgOperator());
     }
 
-    public static void main(String[] args) throws PolishNotationException {
+    public static void main(String[] args) throws PolishNotationException, IOException {
         /* Input from user */
         Scanner sc = new Scanner(System.in);
-        String str = sc.nextLine();
-        System.out.println("You entered string " + str);
+        String filePath = sc.nextLine();
+        System.out.println("You entered File name " + filePath);
         sc.close();
-        rpnCalculate(str);
+        readFileToList(filePath).stream().forEach(str -> {
+            List<String> ls = Arrays.asList(str.toString().split(" "));
+
+            try {
+                if (!Character.isDigit(((String) ls.get(0)).charAt(0))
+                        || !Character.isDigit(((String) ls.get(1)).charAt(0))) {
+                    System.out.println(str + "  Not Reverse Polish Notation try backwards");
+                    return;
+                }
+
+                System.out.println(str + " = " + rpnCalculate(ls));
+            } catch (PolishNotationException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    /**
+     * <p>
+     * This method reads a file and retur list of lines of the file
+     * </p>
+     * 
+     * @param a string of fileName
+     * @return List of lines in a file
+     */
+    private static List<String> readFileToList(String fileName) throws IOException {
+        List<String> result;
+        try (Stream<String> lines = Files.lines(Paths.get(fileName))) {
+            result = lines.collect(Collectors.toList());
+        }
+        return result;
     }
 
     /**
@@ -50,10 +85,7 @@ public class PolishNotationCalculator {
      * @throws PolishNotationException
      */
 
-    public static double rpnCalculate(String rpnStr) throws PolishNotationException {
-
-        /* convert string into list of strings of numbers and operators */
-        List<String> ls = Arrays.asList(rpnStr.split(" "));
+    public static double rpnCalculate(List<String> ls) throws PolishNotationException {
 
         double total = 0;
         for (int i = 0; i < ls.size(); i++) {
@@ -65,12 +97,10 @@ public class PolishNotationCalculator {
 
             /* check operator at position 3 */
             if (i == 0) {
-                if (!symbolOperatorMap.containsKey(ls.get(i + 2))) {
-                    break;
-                }
                 total = calculate(ls.get(i + 2), toDouble(ls.get(i)), toDouble(ls.get(i + 1)));
                 i++;
             }
+
             /* check operator at last position for sqrt,cos,sin */
             else if (ls.get(i).equals(SQRT) || ls.get(i).equals(COS) || ls.get(i).equals(SIN)) {
                 total = calculate(ls.get(i), total, 0);
@@ -78,7 +108,6 @@ public class PolishNotationCalculator {
                 total = calculate(ls.get(i + 1), total, toDouble(ls.get(i)));
             }
         }
-        System.out.println("Total is: " + total);
         return total;
     }
 
@@ -112,7 +141,7 @@ public class PolishNotationCalculator {
         try {
             dbl = Double.valueOf(doubleStr);
         } catch (NumberFormatException ne) {
-            throw new PolishNotationException("User entered incorrect number");
+            throw new PolishNotationException("User entered incorrect input");
         }
         return dbl;
     }
