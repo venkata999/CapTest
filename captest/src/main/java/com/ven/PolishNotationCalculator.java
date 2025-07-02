@@ -61,7 +61,7 @@ public class PolishNotationCalculator {
 
     /**
      * <p>
-     * This method reads a file and retur list of lines of the file
+     * This method reads an external  file and retur list of lines of the file
      * </p>
      * 
      * @param a string of fileName
