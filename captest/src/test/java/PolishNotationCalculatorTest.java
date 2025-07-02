@@ -71,7 +71,6 @@ public class PolishNotationCalculatorTest {
             PolishNotationCalculator.rpnCalculate(getListFromString(calStr));
         });
         assertTrue(exception.getMessage().contains("User entered incorrect input"));
-
     }
 
     @Test
@@ -88,5 +87,4 @@ public class PolishNotationCalculatorTest {
     void calculateTestWithSquareRoot() {
         assertEquals(11.0, PolishNotationCalculator.calculate("sqrt", 121, 0));
     }
-
 }
